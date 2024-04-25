@@ -1,0 +1,7 @@
+
+#esludo venv
+venv
+#django#
+db.sqlite3
+####
+main.py
