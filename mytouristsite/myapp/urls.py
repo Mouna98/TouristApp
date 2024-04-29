@@ -20,5 +20,7 @@ from .import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home')
+    path('', views.home, name='home'),
+    path('mostra_itinerario/<str:name>/<str:place>/<int:duration>/', views.mostra_itinerario, name='mostra_itinerario'),
 ]
+
