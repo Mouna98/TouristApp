@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %} Your Tourist Guide| Itinerary{% endblock title %}
+{% block content %}
+<div class="container">
+        <h1>Benvenuto, {{ name }}!</h1>
+        <h2>Itinerario per la visita di {{ place }}</h2>
+        {% for giorno, attivita in giorni_itinerario.items %}
+        <div class="card mb-3">
+            <div class="card-header">Giorno {{ giorno }}</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for attivita_item in attivita%}
+                    <li class="list-group-item">
+                        <h5 class="card-title">{{ attivita_item.luogo }}</h5>
+                        <p class="card-text">Orario: {{ attivita_item.orario }}</p>
+                        <p class="card-text">{{ attivita_item.descrizione }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock content %}
