@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block title %} Your Tourist Guide| Itinerary{% endblock title %}
 {% block content %}
-<div class="container">
-        <h1>Benvenuto, {{ name }}!</h1>
-        <h2>Itinerario per la visita di {{ place }}</h2>
+<div class="container mt-5">
+        <h1  class="text-center mt-3" style="color: Purple">Welcome, {{ name }}!</h1>
+        <h2 class="text-center mb-4">Here is your itinerary to explore {{ place }}</h2>
         {% for giorno, attivita in giorni_itinerario.items %}
         <div class="card mb-3">
-            <div class="card-header">Giorno {{ giorno }}</div>
+            <div class="card-header text-center">Itinerario: {{ giorno }}</div>
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     {% for attivita_item in attivita%}
@@ -20,6 +20,41 @@
             </div>
         </div>
         {% endfor %}
+ <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' place=place %}">
+    {% csrf_token %}
+    {% for domanda in domande_vero_falso %}
+    <div class="card mb-3">
+        <div class="card-header">Question:</div>
+        <div class="card-body">
+            <p>{{ domanda.domanda }}</p>
+            <!-- Input nascosti per memorizzare l'indice della domanda -->
+            <input type="hidden" name="risposte[{{ forloop.counter0 }}][indice]" value="{{ forloop.counter0 }}">
+            <div class="form-check mt-3">
+                <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="vero_{{ forloop.counter0 }}" value="true">
+                <label class="form-check-label" for="vero_{{ forloop.counter0 }}">True</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="falso_{{ forloop.counter0 }}" value="false">
+                <label class="form-check-label" for="falso_{{ forloop.counter0 }}">False</label>
+            </div>
+            <!-- Descrizione della domanda (inizialmente nascosta) -->
+            <p id="descrizione_{{ forloop.counter0 }}" class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
+        </div>
     </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Invia risposte</button>
+
+ </form>
+<a href="{% url 'pagina_punteggio' punteggio=punteggio %}" class="btn btn-primary">Vedi punteggio</a>
+</div>
+
+{% load static %}
+<script src="{% static 'myapp/myscript.js' %}"></script>
+
+
 
 {% endblock content %}
+
+
+
+
