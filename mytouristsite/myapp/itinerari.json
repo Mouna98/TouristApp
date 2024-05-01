@@ -1,0 +1,157 @@
+{
+  "firenze": {
+    "giorno 1": {
+      "date": "2024-04-10",
+      "attività": [
+        {
+          "luogo": "Duomo di Firenze",
+          "orario": "09:00 - 11:00",
+          "descrizione": "Visita al magnifico Duomo di Firenze, con la sua cupola di Brunelleschi e il campanile di Giotto."
+        },
+        {
+          "luogo": "Museo dell'Accademia",
+          "orario": "11:30 - 13:30",
+          "descrizione": "Ammira la celebre statua di Michelangelo, il David, e altre opere d'arte rinascimentale."
+        },
+        {
+          "luogo": "Mercato Centrale",
+          "orario": "13:30 - 15:00",
+          "descrizione": "Sosta al Mercato Centrale per deliziarsi con specialità toscane come la bistecca fiorentina."
+        },
+        {
+          "luogo": "Gallerie degli Uffizi",
+          "orario": "15:30 - 18:00",
+          "descrizione": "Esplora una delle più importanti collezioni d'arte del mondo, con opere di Leonardo da Vinci, Botticelli, e altri."
+        },
+        {
+          "luogo": "Trattoria La Casalinga",
+          "orario": "19:30 - 21:30",
+          "descrizione": "Goditi una cena autentica toscana in un'atmosfera accogliente e familiare."
+        }
+      ]
+
+
+    },
+    "giorno 2": {
+      "date": "2024-04-11",
+      "attività": [
+        {
+          "luogo": "Galleria Palatina e Giardino di Boboli",
+          "orario": "09:00 - 12:00",
+          "descrizione": "Visita la Galleria Palatina per ammirare dipinti rinascimentali e poi rilassati nei magnifici Giardini di Boboli."
+        },
+        {
+          "luogo": "Ponte Vecchio e Palazzo Pitti",
+          "orario": "14:30 - 17:30",
+          "descrizione": "Attraversa il famoso Ponte Vecchio e visita il sontuoso Palazzo Pitti, residenza dei Medici."
+        },
+        {
+          "luogo": "Osteria delle Tre Panche",
+          "orario": "19:30 - 21:30",
+          "descrizione": "Termina la giornata con una cena raffinata a base di piatti tipici toscani."
+        }
+      ]
+    },
+    "domande_vero_falso": [
+        {
+          "indice": 0,
+          "domanda": "La Cattedrale di Santa Maria del Fiore è famosa per la sua cupola progettata da Michelangelo.",
+          "risposta": "false",
+          "descrizione": "Falso. La cupola della Cattedrale di Santa Maria del Fiore è stata progettata da Filippo Brunelleschi, non da Michelangelo. È un capolavoro dell'architettura rinascimentale."
+        },
+        {
+          "indice": 1,
+          "domanda": "La Galleria degli Uffizi ospita opere di artisti come Botticelli, Leonardo da Vinci e Michelangelo.",
+          "risposta": "true",
+          "descrizione": "Vero. La Galleria degli Uffizi è una delle più importanti gallerie d'arte al mondo e ospita opere di alcuni dei più grandi artisti italiani, tra cui Botticelli, Leonardo da Vinci, Michelangelo e Raffaello."
+        },
+        {
+          "indice": 2,
+          "domanda": "Il Ponte Vecchio è un ponte famoso per le sue botteghe di gioiellieri e orafo.",
+          "risposta": "true",
+          "descrizione": "Vero. Il Ponte Vecchio è uno dei simboli di Firenze e è noto per le sue caratteristiche botteghe di gioiellieri, orafo e artigiani."
+        },
+        {
+          "indice": 3,
+          "domanda": "Il Palazzo Pitti è stato residenza dei Granduchi di Toscana.",
+          "risposta": "true",
+          "descrizione": "Vero. Il Palazzo Pitti è una sontuosa residenza rinascimentale che è stata la residenza dei Granduchi di Toscana, come la famiglia de' Medici."
+        },
+        {
+          "indice": 4,
+          "domanda": "La Basilica di Santa Croce è sepolcro di personaggi illustri come Michelangelo e Galileo Galilei.",
+          "risposta": "true",
+          "descrizione": "Vero. La Basilica di Santa Croce è una delle più importanti chiese francescane ed è nota per essere il sepolcro di illustri personaggi come Michelangelo, Galileo Galilei, Niccolò Machiavelli e molti altri."
+        },
+        {
+          "indice": 5,
+          "domanda": "La Piazza della Signoria è il cuore politico di Firenze, dove si trova il Palazzo Vecchio.",
+          "risposta": "true",
+          "descrizione": "Vero. La Piazza della Signoria è stata per secoli il centro politico di Firenze ed è dominata dal Palazzo Vecchio, sede del governo della città fin dal Medioevo."
+        }
+    ]
+  },
+  "roma": {
+    "giorno 1": {
+      "attività": [
+        {
+          "orario": "09:00 - 12:00",
+          "luogo": "Colosseo",
+          "descrizione": "Inizia la tua avventura a Roma visitando il maestoso Colosseo, uno dei simboli più iconici dell'antica Roma. Ammira l'architettura e scopri la storia dei giochi gladiatori."
+        },
+        {
+          "orario": "13:00 - 16:00",
+          "luogo": "Foro Romano e Palatino",
+          "descrizione": "Dopo una pausa pranzo, esplora il Foro Romano, il centro politico, religioso e commerciale dell'antica Roma. Poi visita il Palatino, la leggendaria collina dove Roma è stata fondata."
+        },
+        {
+          "orario": "17:00 - 19:00",
+          "luogo": "Piazza Venezia e Altare della Patria",
+          "descrizione": "Concludi il primo giorno visitando la spettacolare Piazza Venezia e l'Altare della Patria. Ammira l'imponente monumento e goditi la vista panoramica sulla città."
+        }
+      ]
+    },
+    "giorno 2": {
+      "attività": [
+        {
+          "orario": "09:30 - 12:30",
+          "luogo": "Città del Vaticano e Basilica di San Pietro",
+          "descrizione": "Inizia il secondo giorno con una visita alla Città del Vaticano, lo stato più piccolo del mondo. Ammira i tesori della Basilica di San Pietro e visita i Musei Vaticani."
+        },
+        {
+          "orario": "13:30 - 15:30",
+          "luogo": "Castel Sant'Angelo",
+          "descrizione": "Dopo una pausa pranzo, dirigi verso Castel Sant'Angelo, un antico mausoleo romano trasformato in fortezza. Esplora le sue stanze e ammira la vista sul fiume Tevere."
+        },
+        {
+          "orario": "16:00 - 18:00",
+          "luogo": "Piazza Navona",
+          "descrizione": "Concludi la giornata con una passeggiata nella pittoresca Piazza Navona. Ammira le sue splendide fontane, gli artisti di strada e goditi l'atmosfera vivace."
+        }
+
+      ]
+
+    },
+    "giorno 3": {
+      "attività": [
+        {
+          "orario": "09:00 - 12:00",
+          "luogo": "Pantheon",
+          "descrizione": "Inizia il terzo giorno visitando il Pantheon, un antico tempio romano dedicato a tutti gli dei. Ammira la sua maestosa cupola e scopri la sua storia."
+        },
+        {
+          "orario": "13:00 - 16:00",
+          "luogo": "Trastevere",
+          "descrizione": "Dopo una pausa pranzo, esplora il quartiere di Trastevere, noto per le sue stradine medievali, le piazze pittoresche e l'atmosfera bohémien. "
+        },
+        {
+          "orario": "17:00 - 19:00",
+          "luogo": "Fontana di Trevi",
+          "descrizione": "Concludi il tuo itinerario con una visita alla Fontana di Trevi, una delle fontane più famose al mondo. Fai un desiderio e lanci una moneta nella fontana per assicurarti il ritorno a Roma!"
+        }
+
+      ]
+
+    }
+  }
+}

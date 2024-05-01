@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %} Your Tourist Guide| Domande {% endblock title %}
+{% block content %}
+<div class="container">
+    <h1 class="mt-5">Il tuo punteggio:</h1>
+    <div class="card mt-3" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Punteggio Attuale</h5>
+            <p class="card-text fs-1">{{ punteggio }}</p>
+            {% if punteggio is not None %}
+            <a href="{% url 'pagina_punteggio' punteggio=punteggio %}" class="btn btn-primary">Riprova</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock content %}
