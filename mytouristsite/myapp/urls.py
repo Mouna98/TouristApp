@@ -24,7 +24,6 @@ urlpatterns = [
     path('mostra_itinerario/<str:name>/<str:place>/<int:duration>/', views.mostra_itinerario, name='mostra_itinerario'),
     path('rispondi_domanda/<str:place>/', views.rispondi_domanda, name='rispondi_domanda'),
     path('pagina_punteggio/', views.pagina_punteggio, name='pagina_punteggio'),
-    path('map/', views.my_map_view, name='map'),
 
 ]
 

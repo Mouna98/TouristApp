@@ -8,8 +8,7 @@ from django.http import HttpResponseNotFound, HttpResponseServerError, HttpRespo
 from .models import Visit
 
 
-def my_map_view(request):
-    return render(request, 'myapp/itinerario.html')
+
 
 def home(request):
     if request.method == 'POST':
