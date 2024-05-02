@@ -6,7 +6,7 @@
         <h2 class="text-center mb-4">Here is your itinerary to explore {{ place }}</h2>
         {% for giorno, attivita in giorni_itinerario.items %}
         <div class="card mb-3">
-            <div class="card-header text-center">Itinerario: {{ giorno }}</div>
+            <div class="card-header text-center">ITINERARIO: {{ giorno }}</div>
             <div class="card-body">
                 <ul class="list-group list-group-flush">
                     {% for attivita_item in attivita%}
@@ -20,11 +20,17 @@
             </div>
         </div>
         {% endfor %}
- <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' place=place %}">
+
+<div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
+    <button id="mostra_mappa" class="btn btn-primary">Mostra mappa</button>
+
+<h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
+
+ <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' place=place %}?punteggio={{ punteggio }}">
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">
-        <div class="card-header">Question:</div>
+        <div class="card-header">Question</div>
         <div class="card-body">
             <p>{{ domanda.domanda }}</p>
             <!-- Input nascosti per memorizzare l'indice della domanda -->
@@ -43,9 +49,8 @@
     </div>
     {% endfor %}
     <button type="submit" class="btn btn-primary">Invia risposte</button>
-
  </form>
-<a href="{% url 'pagina_punteggio' punteggio=punteggio %}" class="btn btn-primary">Vedi punteggio</a>
+  <a id="visualizza_punteggio" href="{% url 'pagina_punteggio' %}?punteggio={{ punteggio }}" class="btn btn-primary" {% if punteggio %}style="display: inline-block;"{% else %}style="display: none;"{% endif %}>Visualizza punteggio</a>
 </div>
 
 {% load static %}

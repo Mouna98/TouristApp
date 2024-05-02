@@ -1,37 +1,37 @@
 {% extends 'base.html' %}
 {% block title %} Your Tourist Guide| Home {% endblock title %}
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4" style="color: Purple">Your Tourist Guide</h1>
-    <p>Hi there! Ready for your next adventure?</p>
-    <form method="post">
-        {% csrf_token %}
-        <div class="row mb-3">
-            <label  class="col-sm-2 col-form-label">Enter your name:</label>
-            <div class="col-sm-10">
-                {{ form.name }}
+<div class="container mt-5 mx-auto">
+        <h1 class="mb-4" style="color: Purple">Your Tourist Guide</h1>
+        <p>Hi there! Ready for your next adventure?</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <label  class="col-sm-2 col-form-label">Enter your name:</label>
+                <div class="col-sm-10">
+                    {{ form.name }}
+                </div>
             </div>
-        </div>
-        <div class="row mb-3">
-            <p>Which city will you visit?</p>
-            <label class="col-sm-2 col-form-label">Enter the city:</label>
-            <div class="col-sm-10">
-                {{ form.place }}
+            <div class="row mb-3">
+                <p>Which city will you visit?</p>
+                <label class="col-sm-2 col-form-label">Enter the city:</label>
+                <div class="col-sm-10">
+                    {{ form.place }}
+                </div>
             </div>
-        </div>
-        <div class="row mb-3">
-            <p>For how many days you need the itinerary?</p>
-            <label  class="col-sm-2 col-form-label">Enter the duration (in days):</label>
-            <div class="col-sm-10">
-                {{ form.duration }}
+            <div class="row mb-3">
+                <p>For how many days you need the itinerary?</p>
+                <label  class="col-sm-2 col-form-label">Enter the duration (in days):</label>
+                <div class="col-sm-10">
+                    {{ form.duration }}
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-10 offset-sm-2">
-                <button type="submit" class="btn btn-primary">GO</button>
+            <div class="row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">GO</button>
+                </div>
             </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 
 {% endblock content %}

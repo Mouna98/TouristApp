@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from urllib.parse import urlencode
 
 from .forms import VisitForm
 import json
 from django.http import HttpResponseNotFound, HttpResponseServerError, HttpResponse, HttpResponseRedirect, JsonResponse
 from .models import Visit
 
+
+def my_map_view(request):
+    return render(request, 'myapp/itinerario.html')
 
 def home(request):
     if request.method == 'POST':
@@ -20,7 +24,14 @@ def home(request):
             return redirect('mostra_itinerario', name=name, place=place, duration=duration)
     else:
         form = VisitForm()
-    return render(request, 'myapp/home.html', {'form': form})
+
+    # Ottieni il punteggio dalla query string dell'URL
+    punteggio = request.GET.get('punteggio')
+
+    # Inizializza punteggio a None nel contesto se non presente nella query string
+    context = {'form': form, 'punteggio': punteggio}
+
+    return render(request, 'myapp/home.html', context)
 
 
 def mostra_itinerario(request, name, place, duration):
@@ -120,20 +131,31 @@ def rispondi_domanda(request,place):
 
             print("Tipo di punteggio:", type(punteggio))
             print("Valore di punteggio:", punteggio)
-            context = {'punteggio': punteggio}
 
-            return render(request, 'myapp/domanda.html', context)
+            # Genera l'URL per la vista pagina_punteggio con il punteggio come parametro GET
+            pagina_punteggio_url = reverse('pagina_punteggio') + f'?punteggio={punteggio}&place={place}'
+            print("URL generato per pagina_punteggio:", pagina_punteggio_url)
+
+            # Reindirizza l'utente alla pagina del punteggio
+            return HttpResponseRedirect(pagina_punteggio_url)
         except Exception as e:
             print(f"Errore durante la gestione delle risposte dell'utente: {e}")
 
     return JsonResponse({'error': 'Metodo non consentito'}, status=405)
 
-def pagina_punteggio(request, punteggio):
+def pagina_punteggio(request):
+    try:
+        print("Query string completa:", request.GET)
+        # Ottieni il punteggio dalla query string dell'URL
+        punteggio = request.GET.get('punteggio')
+        print("Punteggio attuale:", punteggio)
 
-      # Ottieni il punteggio dalla query string dell'URL, se presente
-    print("Punteggio attuale:", punteggio)
-
-    return render(request, 'myapp/domanda.html', {'punteggio': punteggio})
-
-
-
+        if punteggio is not None:
+            return render(request, 'myapp/domanda.html', {'punteggio': punteggio})
+        else:
+            # Se il punteggio non è presente nella query string, gestisci l'errore o reindirizza l'utente
+            return HttpResponse("Punteggio non trovato nella query string")
+    except Exception as e:
+        print(f"Errore durante il recupero del punteggio dalla query string: {e}")
+        # Gestisci l'errore o reindirizza l'utente
+        return HttpResponseServerError("Si è verificato un errore durante il recupero del punteggio dalla query string")
