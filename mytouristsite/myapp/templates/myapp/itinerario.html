@@ -20,11 +20,14 @@
             </div>
         </div>
         {% endfor %}
+     <h5 class="text-center mb-4">View the city map here</h5>
 
-<div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
+<div class="d-flex justify-content-center mt-3">
+    <div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
     <button id="mostra_mappa" class="btn btn-primary">Mostra mappa</button>
+    </div>
 
-<h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
+    <h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
 
  <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' place=place %}?punteggio={{ punteggio }}">
     {% csrf_token %}
@@ -43,18 +46,25 @@
                 <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="falso_{{ forloop.counter0 }}" value="false">
                 <label class="form-check-label" for="falso_{{ forloop.counter0 }}">False</label>
             </div>
-            <!-- Descrizione della domanda (inizialmente nascosta) -->
-            <p id="descrizione_{{ forloop.counter0 }}" class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
+            <!-- Descrizione della domanda (inizialmente nascosta)-->
+             <p class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
         </div>
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Invia risposte</button>
+     <div class="d-flex justify-content-center mt-3">
+         <button type="submit" class="btn btn-primary">Invia risposte</button>
+     </div>
  </form>
-  <a id="visualizza_punteggio" href="{% url 'pagina_punteggio' %}?punteggio={{ punteggio }}" class="btn btn-primary" {% if punteggio %}style="display: inline-block;"{% else %}style="display: none;"{% endif %}>Visualizza punteggio</a>
+    <div class="d-flex justify-content-center mt-3">
+    <!-- Aggiungi il pulsante per mostrare le descrizioni -->
+    <button id="mostra_descrizioni" class="btn btn-primary">View corrections</button>
+    </div>
+
 </div>
 
 {% load static %}
 <script src="{% static 'myapp/myscript.js' %}"></script>
+<script src="{% static 'myapp/map.js' %}"></script>
 
 
 

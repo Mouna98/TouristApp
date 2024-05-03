@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %} Your Tourist Guide| Domande {% endblock title %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4" style="color: Purple">Your Tourist Guide</h1>
+    <h3 class="mt-5" style="color: Purple">You are now a Top Traveler!</h3>
+    <div class="card mt-3 border-0">
+        <div class="card-body text-center">
+            <h5 class="card-title">Your score is :</h5>
+            <p id="punteggio" class="card-text display-4 text-purple">{{ punteggio }} correct answers!</p>
+        </div>
+
+    </div>
+    <h3 class="mt-5" style="color: Purple">Go back to see the corrections!</h3>
+</div>
+
+
+
+
+
+{% endblock content %}

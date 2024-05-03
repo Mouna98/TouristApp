@@ -1,15 +1,9 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from urllib.parse import urlencode
-
 from .forms import VisitForm
 import json
 from django.http import HttpResponseNotFound, HttpResponseServerError, HttpResponse, HttpResponseRedirect, JsonResponse
 from .models import Visit
-
-
-
-
 def home(request):
     if request.method == 'POST':
         form = VisitForm(request.POST)
@@ -109,7 +103,7 @@ def calcola_punteggio(place, risposte_utente):
             punteggio += 1
     return punteggio
 
-def rispondi_domanda(request,place):
+def rispondi_domanda(request, place):
     print("Inizio vista rispondi_domanda")
 
     if request.method == 'POST':
@@ -135,12 +129,14 @@ def rispondi_domanda(request,place):
             pagina_punteggio_url = reverse('pagina_punteggio') + f'?punteggio={punteggio}&place={place}'
             print("URL generato per pagina_punteggio:", pagina_punteggio_url)
 
-            # Reindirizza l'utente alla pagina del punteggio
-            return HttpResponseRedirect(pagina_punteggio_url)
+            # Reindirizza l'utente direttamente alla pagina del punteggio
+            return redirect(pagina_punteggio_url)
         except Exception as e:
             print(f"Errore durante la gestione delle risposte dell'utente: {e}")
 
-    return JsonResponse({'error': 'Metodo non consentito'}, status=405)
+            # Se la richiesta non è di tipo POST
+    return redirect(pagina_punteggio_url)
+
 
 def pagina_punteggio(request):
     try:
@@ -150,7 +146,7 @@ def pagina_punteggio(request):
         print("Punteggio attuale:", punteggio)
 
         if punteggio is not None:
-            return render(request, 'myapp/domanda.html', {'punteggio': punteggio})
+            return render(request, 'myapp/punteggio.html', {'punteggio': punteggio})
         else:
             # Se il punteggio non è presente nella query string, gestisci l'errore o reindirizza l'utente
             return HttpResponse("Punteggio non trovato nella query string")

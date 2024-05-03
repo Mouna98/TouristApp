@@ -152,6 +152,46 @@
 
       ]
 
-    }
+    },
+    "domande_vero_falso": [
+        {
+          "indice": 0,
+          "domanda": "Il Colosseo è il più grande anfiteatro romano mai costruito.",
+          "risposta": "true",
+          "descrizione": "Vero. Il Colosseo è uno dei più grandi e ben conservati anfiteatri romani al mondo. Era in grado di contenere fino a 80.000 spettatori."
+
+        },
+        {
+          "indice": 1,
+           "domanda": "Il Foro Romano era il centro politico, religioso e commerciale dell'antica Roma.",
+           "risposta": "true",
+           "descrizione": "Vero. Il Foro Romano era il centro nevralgico della vita pubblica romana, ospitando importanti edifici governativi, templi, basiliche e mercati."
+       },
+       {
+         "indice": 2,
+        "domanda": "La Città del Vaticano è il più piccolo stato indipendente del mondo.",
+         "risposta": "true",
+         "descrizione": "Vero. La Città del Vaticano è uno stato indipendente all'interno della città di Roma ed è il più piccolo stato del mondo per superficie e popolazione."
+       },
+       {
+         "indice": 3,
+         "domanda": "Il Pantheon è un antico tempio romano dedicato a tutti gli dei.",
+         "risposta": "true",
+         "descrizione": "Vero. Il Pantheon è uno dei monumenti meglio conservati dell'antica Roma ed è stato costruito come tempio dedicato a tutte le divinità dell'antica Roma."
+       },
+       {
+         "indice": 4,
+         "domanda": "La Fontana di Trevi è la più grande e famosa fontana di Roma.",
+         "risposta": "false",
+         "descrizione": "Falso. Sebbene la Fontana di Trevi sia una delle fontane più famose al mondo, non è la più grande di Roma. La Fontana dell'Acqua Paola, conosciuta anche come Fontanone, è la più grande fontana barocca di Roma."
+       },
+       {
+         "indice": 5,
+         "domanda": "Piazza Navona è una delle piazze più celebri di Roma, nota per le sue tre fontane.",
+         "risposta": "true",
+         "descrizione": "Vero. Piazza Navona è una delle piazze più famose e pittoresche di Roma, con le sue tre splendide fontane: la Fontana dei Quattro Fiumi, la Fontana del Moro e la Fontana del Nettuno."
+       }
+    ]
   }
 }
+
