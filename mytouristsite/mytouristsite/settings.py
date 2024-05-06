@@ -106,7 +106,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
    }
 
-    #"default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+   # "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
 }
 
 
