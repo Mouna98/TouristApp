@@ -22,6 +22,8 @@ document.getElementById('visualizza_punteggio').addEventListener('click', functi
     })
     .then(response => {
         if (response.ok) {
+            // Mostra il pulsante "Mostra descrizioni" dopo aver inviato le risposte con successo
+            //document.getElementById('mostra_descrizioni').style.display = 'block';
 
        // Reindirizza l'utente alla pagina del punteggio
             var punteggioUrl = this.getAttribute('data-punteggio-url');
