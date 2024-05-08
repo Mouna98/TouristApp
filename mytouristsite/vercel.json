@@ -23,5 +23,8 @@
         "src": "/(.*)",
         "dest": "mytouristsite/wsgi.py"
       }
-    ]
+    ],
+  "rewrites":  [
+    {"source": "/(.*)", "destination": "/"}
+  ]
   }
