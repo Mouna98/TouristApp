@@ -47,7 +47,7 @@ LOGGING = {
     },
 }
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1','.vercel.app','.now.sh']
 
 # Impostazione del SESSION_ENGINE
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
