@@ -15,10 +15,7 @@
       }
     ],
     "routes": [
-      {
-      "src": "/[^.]+",
-      "dest": "/"
-      },
+
       {
         "src": "/static/(.*)",
         "dest": "/static/$1"
@@ -27,8 +24,6 @@
         "src": "/(.*)",
         "dest": "mytouristsite/wsgi.py"
       }
-    ],
-  "rewrites":  [
-    {"source": "/(.*)", "destination": "/"}
-  ]
+    ]
+
   }
