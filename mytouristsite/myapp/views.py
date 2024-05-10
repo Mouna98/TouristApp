@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from .forms import VisitForm
+import requests
 import json
 from django.http import HttpResponseNotFound, HttpResponseServerError, HttpResponse, HttpResponseRedirect, JsonResponse
 from .models import Visit
+
+
 def home(request):
     if request.method == 'POST':
         form = VisitForm(request.POST)
@@ -26,7 +29,6 @@ def home(request):
 
     return render(request, 'myapp/home.html', context)
 
-
 def mostra_itinerario(request, name, place, duration):
     try:
         # Leggi il file JSON
@@ -37,6 +39,14 @@ def mostra_itinerario(request, name, place, duration):
         giorni_itinerario = {}
         domande_vero_falso = []
 
+        # Funzione per ottenere URL casuale da Unsplash
+        def get_unsplash_image_url(luogo, place):
+            query = f"{luogo.replace(' ', '-')} {place.replace(' ', '-')}"
+            response = requests.get(f"https://api.unsplash.com/photos/random?query={query}&client_id=a-ybJeh4LRm2Ehc2SCZyHqWWJ6NSaeNRgSxon5JGCUY")
+            if response.status_code == 200:
+                return response.json()['urls']['regular']
+            else:
+                return None
 
         # Ottieni l'itinerario per la città e il numero di giorni
         for i in range(1, int(duration) + 1):
@@ -44,23 +54,38 @@ def mostra_itinerario(request, name, place, duration):
             giorno_data = itinerario_citta.get(giorno_key, {})
 
             # Ottieni solo le informazioni necessarie per ogni attività del giorno
-            attivita_giorno = [{
-                'luogo': attivita.get('luogo', ''),
-                'orario': attivita.get('orario', ''),
-                'descrizione': attivita.get('descrizione', '')
-            } for attivita in giorno_data.get('attività', [])]
+            attivita_giorno = []
+            for attivita in giorno_data.get('attività', []):
+                luogo = attivita.get('luogo', '')
+                orario = attivita.get('orario', '')
+                descrizione = attivita.get('descrizione', '')
+                # Ottieni URL casuale per l'immagine del luogo da Unsplash
+                immagine = get_unsplash_image_url(luogo, place)
+                attivita_giorno.append(
+                    {'luogo': luogo, 'orario': orario, 'descrizione': descrizione, 'immagine': immagine})
 
             giorni_itinerario[giorno_key] = attivita_giorno
 
         # Ottieni le domande vero/falso per la città
         domande_vero_falso = itinerari_data.get(place.lower(), {}).get('domande_vero_falso', [])
 
-        return render(request, 'myapp/itinerario.html', {'name': name, 'place': place, 'duration': duration, 'giorni_itinerario': giorni_itinerario, 'domande_vero_falso': domande_vero_falso})
+        # Aggiungi il punteggio al contesto
+        context = {
+            'name': name,
+            'place': place,
+            'duration': duration,
+            'giorni_itinerario': giorni_itinerario,
+            'domande_vero_falso': domande_vero_falso,
+            'punteggio': request.GET.get('punteggio'),  # Passa il punteggio alla vista
+
+        }
+
+
+        return render(request, 'myapp/itinerario.html', context)
     except FileNotFoundError:
         return HttpResponseNotFound("File JSON non trovato")
     except Exception as e:
         return HttpResponseServerError("Si è verificato un errore durante il recupero dell'itinerario: {}".format(str(e)))
-
 
 def is_risposta_corretta(place, indice, risposta):
     try:
@@ -103,7 +128,7 @@ def calcola_punteggio(place, risposte_utente):
             punteggio += 1
     return punteggio
 
-def rispondi_domanda(request, place):
+def rispondi_domanda(request, name, place, duration):
     print("Inizio vista rispondi_domanda")
 
     if request.method == 'POST':
@@ -122,35 +147,81 @@ def rispondi_domanda(request, place):
             punteggio = calcola_punteggio(place, risposte_utente)
             print("Punteggio:", punteggio)
 
-            print("Tipo di punteggio:", type(punteggio))
-            print("Valore di punteggio:", punteggio)
+            # Ottieni l'itinerario e le domande dal file JSON degli itinerari
+            itinerario,domande=ottieni_domande_itinerario(name, place, duration)
 
-            # Genera l'URL per la vista pagina_punteggio con il punteggio come parametro GET
-            pagina_punteggio_url = reverse('pagina_punteggio') + f'?punteggio={punteggio}&place={place}'
-            print("URL generato per pagina_punteggio:", pagina_punteggio_url)
+            # Aggiungi il punteggio, l'itinerario e le domande al contesto
+            context = {
+                'name': name,  # Aggiungi il nome se necessario
+                'place': place,
+                'duration': duration,  # Aggiungi la durata se necessario
+                'giorni_itinerario': itinerario,
+                'domande_vero_falso': domande,
+                'punteggio': punteggio  # Aggiungi il punteggio qui
+            }
 
-            # Reindirizza l'utente direttamente alla pagina del punteggio
-            return redirect(pagina_punteggio_url)
+            # Renderizza direttamente il template dell'itinerario con il punteggio, l'itinerario e le domande
+            return render(request, 'myapp/punteggio.html', context)
         except Exception as e:
-            print(f"Errore durante la gestione delle risposte dell'utente: {e}")
+         print(f"Errore durante la gestione delle risposte dell'utente: {e}")
+         return HttpResponseServerError("Si è verificato un errore durante la gestione delle risposte dell'utente.")
+    else:
+         # Se la richiesta non è di tipo POST, restituisci una risposta HTTP 404
+         return HttpResponseNotFound("La pagina richiesta non è stata trovata.")
 
-            # Se la richiesta non è di tipo POST
-    return redirect(pagina_punteggio_url)
-
-
-def pagina_punteggio(request):
+def ottieni_domande_itinerario( name, place, duration):
     try:
-        print("Query string completa:", request.GET)
-        # Ottieni il punteggio dalla query string dell'URL
-        punteggio = request.GET.get('punteggio')
-        print("Punteggio attuale:", punteggio)
+        # Leggi il file JSON
+        with open('myapp/itinerari.json') as file:
+            itinerari_data = json.load(file)
 
-        if punteggio is not None:
-            return render(request, 'myapp/punteggio.html', {'punteggio': punteggio})
-        else:
-            # Se il punteggio non è presente nella query string, gestisci l'errore o reindirizza l'utente
-            return HttpResponse("Punteggio non trovato nella query string")
+        itinerario_citta = itinerari_data.get(place.lower(), {})
+        giorni_itinerario = {}
+        domande_vero_falso = []
+
+        # Funzione per ottenere URL casuale da Unsplash
+        def get_unsplash_image_url(luogo, place):
+            query = f"{luogo.replace(' ', '-')} {place.replace(' ', '-')}"
+            response = requests.get(
+                f"https://api.unsplash.com/photos/random?query={query}&client_id=a-ybJeh4LRm2Ehc2SCZyHqWWJ6NSaeNRgSxon5JGCUY")
+            if response.status_code == 200:
+                return response.json()['urls']['regular']
+            else:
+                return None
+
+        # Ottieni l'itinerario per la città e il numero di giorni
+        for i in range(1, int(duration) + 1):
+            giorno_key = f'giorno {i}'
+            giorno_data = itinerario_citta.get(giorno_key, {})
+
+            # Ottieni solo le informazioni necessarie per ogni attività del giorno
+            attivita_giorno = []
+            for attivita in giorno_data.get('attività', []):
+                luogo = attivita.get('luogo', '')
+                orario = attivita.get('orario', '')
+                descrizione = attivita.get('descrizione', '')
+                # Ottieni URL casuale per l'immagine del luogo da Unsplash
+                immagine = get_unsplash_image_url(luogo, place)
+                attivita_giorno.append(
+                    {'luogo': luogo, 'orario': orario, 'descrizione': descrizione, 'immagine': immagine})
+
+            giorni_itinerario[giorno_key] = attivita_giorno
+
+        # Ottieni le domande vero/falso per la città
+        domande_vero_falso = itinerario_citta.get('domande_vero_falso', [])
+
+        # Aggiungi il punteggio al contesto
+        context = {
+            'name': name,
+            'place': place,
+            'duration': duration,
+            'giorni_itinerario': giorni_itinerario,
+            'domande_vero_falso': domande_vero_falso,
+
+        }
+
+        return giorni_itinerario, domande_vero_falso
+    except FileNotFoundError:
+        return {}, []
     except Exception as e:
-        print(f"Errore durante il recupero del punteggio dalla query string: {e}")
-        # Gestisci l'errore o reindirizza l'utente
-        return HttpResponseServerError("Si è verificato un errore durante il recupero del punteggio dalla query string")
+        return {}, []

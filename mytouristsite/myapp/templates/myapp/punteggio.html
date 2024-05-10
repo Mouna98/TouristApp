@@ -1,19 +1,84 @@
 {% extends 'index.html' %}
 {% block title %} Your Tourist Guide| Domande {% endblock title %}
 {% block content %}
-<div class="container">
-    <h1 class="mb-4" style="color: Purple">Your Tourist Guide</h1>
-    <h3 class="mt-5" style="color: Purple">You are now a Top Traveler!</h3>
-    <div class="card mt-3 border-0">
-        <div class="card-body text-center">
-            <h5 class="card-title">Your score is :</h5>
-            <p id="punteggio" class="card-text display-4 text-purple">{{ punteggio }} correct answers!</p>
+<div class="container mt-5">
+        <h1  class="text-center mt-3" style="color: Purple">Welcome, {{ name }}!</h1>
+        <h2 class="text-center mb-4">Here is your itinerary to explore {{ place }}</h2>
+        {% for giorno, attivita in giorni_itinerario.items %}
+        <div class="card mb-3">
+            <div class="card-header text-center">ITINERARIO: {{ giorno }}</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for attivita_item in attivita%}
+                    <li class="list-group-item">
+                        <h5 class="card-title">{{ attivita_item.luogo }}</h5>
+                        <p class="card-text">Orario: {{ attivita_item.orario }}</p>
+                        <p class="card-text">{{ attivita_item.descrizione }}</p>
+                        {% if attivita_item.immagine %}
+                    <img src="{{ attivita_item.immagine }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
+                    {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
+        {% endfor %}
+     <h5 class="text-center mb-4">View the city map here</h5>
 
+<div class="d-flex justify-content-center mt-3">
+    <div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
+    <button id="mostra_mappa" class="btn btn-primary">Mostra mappa</button>
     </div>
-    <h3 class="mt-5" style="color: Purple">Go back to see the corrections! </h3>
+
+    <h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
+    <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
+    {% csrf_token %}
+    {% for domanda in domande_vero_falso %}
+    <div class="card mb-3">
+        <div class="card-header">Question</div>
+        <div class="card-body">
+            <p>{{ domanda.domanda }}</p>
+            <!-- Input nascosti per memorizzare l'indice della domanda -->
+            <input type="hidden" name="risposte[{{ forloop.counter0 }}][indice]" value="{{ forloop.counter0 }}">
+            <div class="form-check mt-3">
+                <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="vero_{{ forloop.counter0 }}" value="true">
+                <label class="form-check-label" for="vero_{{ forloop.counter0 }}">True</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="falso_{{ forloop.counter0 }}" value="false">
+                <label class="form-check-label" for="falso_{{ forloop.counter0 }}">False</label>
+            </div>
+            <!-- Descrizione della domanda (inizialmente nascosta)-->
+               <p class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
+
+        </div>
+    </div>
+    {% endfor %}
+     <div class="d-flex justify-content-center mt-3">
+         <button type="submit" class="btn btn-primary">Invia risposte</button>
+     </div>
+     <!-- Mostra il punteggio se disponibile -->
+    {% if punteggio is not None %}
+    <div class="text-center mt-3" id="punteggio_container">
+        <p>Your score: {{ punteggio }}</p>
+    </div>
+    {% endif %}
+ </form>
+
+
+    <div class="d-flex justify-content-center mt-3">
+    <!-- Aggiungi il pulsante per mostrare le descrizioni -->
+    <button id="mostra_descrizioni" class="btn btn-primary" >View corrections</button>
+    </div>
+
 </div>
 
+{% load static %}
+<script src="{% static 'myapp/myscript.js' %}"></script>
+<script src="{% static 'myapp/map.js' %}"></script>
+<script src="{% static 'path/to/jquery.min.js' %}"></script>
+<script src="{% static 'myapp/descrizioni.js' %}"></script>
+<script src="{% static 'myapp/localstorage.js' %}"></script>
 
 
 

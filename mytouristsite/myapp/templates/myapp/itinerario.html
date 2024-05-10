@@ -14,6 +14,9 @@
                         <h5 class="card-title">{{ attivita_item.luogo }}</h5>
                         <p class="card-text">Orario: {{ attivita_item.orario }}</p>
                         <p class="card-text">{{ attivita_item.descrizione }}</p>
+                        {% if attivita_item.immagine %}
+                    <img src="{{ attivita_item.immagine }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
+                    {% endif %}
                     </li>
                     {% endfor %}
                 </ul>
@@ -29,7 +32,7 @@
 
     <h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
 
- <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' place=place %}?punteggio={{ punteggio }}">
+ <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">
@@ -47,24 +50,32 @@
                 <label class="form-check-label" for="falso_{{ forloop.counter0 }}">False</label>
             </div>
             <!-- Descrizione della domanda (inizialmente nascosta)-->
-             <p class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
+               <p class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
+
         </div>
     </div>
     {% endfor %}
      <div class="d-flex justify-content-center mt-3">
          <button type="submit" class="btn btn-primary">Invia risposte</button>
      </div>
- </form>
-    <div class="d-flex justify-content-center mt-3">
-    <!-- Aggiungi il pulsante per mostrare le descrizioni -->
-    <button id="mostra_descrizioni" class="btn btn-primary" >View corrections</button>
+     <!-- Mostra il punteggio se disponibile -->
+    {% if punteggio is not None %}
+    <div class="text-center mt-3" id="punteggio_container">
+        <p>Your score: {{ punteggio }}</p>
     </div>
+    {% endif %}
+ </form>
+
 
 </div>
 
 {% load static %}
 <script src="{% static 'myapp/myscript.js' %}"></script>
 <script src="{% static 'myapp/map.js' %}"></script>
+<script src="{% static 'myapp/localstorage.js' %}"></script>
+
+
+
 
 
 

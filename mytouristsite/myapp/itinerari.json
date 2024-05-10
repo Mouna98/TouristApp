@@ -12,6 +12,7 @@
           "luogo": "Museo dell'Accademia",
           "orario": "11:30 - 13:30",
           "descrizione": "Ammira la celebre statua di Michelangelo, il David, e altre opere d'arte rinascimentale."
+
         },
         {
           "luogo": "Mercato Centrale",
@@ -29,8 +30,6 @@
           "descrizione": "Goditi una cena autentica toscana in un'atmosfera accogliente e familiare."
         }
       ]
-
-
     },
     "giorno 2": {
       "date": "2024-04-11",
@@ -39,6 +38,7 @@
           "luogo": "Galleria Palatina e Giardino di Boboli",
           "orario": "09:00 - 12:00",
           "descrizione": "Visita la Galleria Palatina per ammirare dipinti rinascimentali e poi rilassati nei magnifici Giardini di Boboli."
+
         },
         {
           "luogo": "Ponte Vecchio e Palazzo Pitti",
