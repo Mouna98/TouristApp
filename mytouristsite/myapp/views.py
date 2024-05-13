@@ -120,13 +120,14 @@ def is_risposta_corretta(place, indice, risposta):
 
     return False
 
-
 def calcola_punteggio(place, risposte_utente):
     punteggio = 0
     for indice, risposta in risposte_utente.items():
         if is_risposta_corretta(place, int(indice), risposta):
             punteggio += 1
     return punteggio
+
+
 
 def rispondi_domanda(request, name, place, duration):
     print("Inizio vista rispondi_domanda")
@@ -218,6 +219,7 @@ def ottieni_domande_itinerario( name, place, duration):
             'giorni_itinerario': giorni_itinerario,
             'domande_vero_falso': domande_vero_falso,
 
+
         }
 
         return giorni_itinerario, domande_vero_falso
@@ -225,3 +227,95 @@ def ottieni_domande_itinerario( name, place, duration):
         return {}, []
     except Exception as e:
         return {}, []
+
+
+def livello_due(request, name, place, duration):
+    try:
+        # Leggi il file JSON degli itinerari
+        with open('myapp/itinerari.json') as file:
+            itinerari_data = json.load(file)
+
+        # Ottieni le domande di livello due per la città
+        domande_livello_due = itinerari_data.get(place.lower(), {}).get('domande_livello_due', [])
+
+        # Inizializza punteggio a None
+        punteggio = None
+
+        if request.method == 'POST':
+            risposte_utente = {}
+
+            for key, value in request.POST.items():
+                if key.startswith('risposte'):
+                    index = key.split('[')[1].split(']')[0]
+                    campo = key.split('[')[2].split(']')[0]
+                    if index not in risposte_utente:
+                        risposte_utente[index] = {}
+                    risposte_utente[index][campo] = value
+
+            print("Risposte dell'utente:", risposte_utente)
+
+            # Calcola il punteggio solo se ci sono risposte dell'utente
+            if risposte_utente:
+                punteggio = calcola_punteggio_livello_due(place, risposte_utente)
+                print("Punteggio:", punteggio)
+
+        # Ottieni l'itinerario per la città e il numero di giorni
+        itinerario, _ = ottieni_domande_itinerario(name, place, duration)
+
+        # Aggiungi il punteggio al contesto
+        context = {
+            'name': name,
+            'place': place,
+            'duration': duration,
+            'giorni_itinerario': itinerario,
+            'domande': domande_livello_due,
+            'punteggio': punteggio  # Passa il punteggio al contesto
+        }
+
+        return render(request, 'myapp/domande_livello_due.html', context)
+    except FileNotFoundError:
+        return HttpResponseNotFound("File JSON non trovato")
+    except Exception as e:
+        return HttpResponseServerError("Si è verificato un errore durante il recupero delle domande di livello due: {}".format(str(e)))
+
+
+def is_risposta_corretta_livello_due(place, indice, risposta):
+    try:
+        # Leggi il file JSON degli itinerari
+        with open('myapp/itinerari.json') as file:
+            itinerari_data = json.load(file)
+
+        # Trova il luogo nel file JSON
+        itinerario_citta = itinerari_data.get(place.lower(), {})
+        domande_livello_due = itinerario_citta.get('domande_livello_due', [])
+
+        # Verifica se la chiave 'domande_livello_due' è presente nel dizionario
+        if domande_livello_due:
+            print("Chiave 'domande_livello_due' trovata")
+            if 0 <= indice < len(domande_livello_due):
+                print("Indice valido per domande livello due:", indice)
+                # Confronta direttamente le stringhe delle risposte
+                if domande_livello_due[indice]["risposta"].lower() == risposta['risposta'].lower():
+                    print(f"Domanda {indice} di livello due risposta corretta: {risposta['risposta']}")
+                    return True
+                else:
+                    print(f"Domanda {indice} di livello due risposta errata: {risposta['risposta']}")
+            else:
+                print("Indice non valido per domande livello due")
+        else:
+            print("Chiave 'domande_livello_due' non trovata per il luogo specificato")
+
+    except FileNotFoundError:
+        print("File JSON non trovato")
+    except Exception as e:
+        print("Errore durante il caricamento del file JSON:", e)
+
+    return False
+
+def calcola_punteggio_livello_due(place, risposte_utente):
+    punteggio = 0
+    for indice, risposta in risposte_utente.items():
+        if is_risposta_corretta_livello_due(place, int(indice), risposta):
+            punteggio += 1
+    return punteggio
+

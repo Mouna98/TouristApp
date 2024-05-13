@@ -1,10 +1,10 @@
 {% extends 'index.html' %}
-{% block title %} Your Tourist Guide| Domande {% endblock title %}
+{% block title %} Your Tourist Guide| Livello due{% endblock title %}
 {% block content %}
 <div class="container mt-5">
     <nav class="navbar navbar-expand-sm bg-primary navbar-dark fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">La Guida Turistica AI</a>
+    <a class="navbar-brand" href="#"> La Guida Turistica AI</a>
   </div>
 </nav>
 
@@ -29,19 +29,20 @@
             </div>
         </div>
         {% endfor %}
-     <h5 class="text-center mb-4">Visualizza la mappa della città qua </h5>
+     <h5 class="text-center mb-4">Visualizza la mappa della città qua</h5>
 
 <div class="d-flex justify-content-center mt-3">
     <div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
-    <button id="mostra_mappa" class="btn btn-primary">Mostra mappa</button>
+    <button id="mostra_mappa" class="btn btn-primary" data-place="{{ place }}">Mostra mappa</button>
     </div>
 
     <h2 class="text-center mb-4">Rispondi a queste domande e impara a conoscere la città!</h2>
-    <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
+
+ <form id="risposte_form" method="post" action="{% url 'livello_due' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
     {% csrf_token %}
-    {% for domanda in domande_vero_falso %}
+     {% for domanda in domande %}
     <div class="card mb-3">
-        <div class="card-header">Domanda</div>
+        <div class="card-header">Domanda Livello Esperti</div>
         <div class="card-body">
             <p>{{ domanda.domanda }}</p>
             <!-- Input nascosti per memorizzare l'indice della domanda -->
@@ -60,39 +61,36 @@
         </div>
     </div>
     {% endfor %}
-
+     <div class="d-flex justify-content-center mt-3">
+         <button type="submit" class="btn btn-primary">Invia risposte</button>
+     </div>
      <!-- Mostra il punteggio se disponibile -->
     {% if punteggio is not None %}
     <div class="text-center mt-3" id="punteggio_container">
-        <h2 class="text-center mb-4">Complimenti hai risposto alle domande di livello per i non esperti! sei riuscito a rispondere correttamente a {{ punteggio }} domande</h2>
-        <p>Il tuo punteggio è: {{ punteggio }}</p>
+        <p>Your score: {{ punteggio }}</p>
+         <div class="d-flex justify-content-center mt-3">
+    <!-- Aggiungi il pulsante per mostrare le descrizioni -->
+    <button id="mostra_descrizioni" class="btn btn-primary" >Visualizza le correzioni </button>
+    </div>
     </div>
     {% endif %}
  </form>
 
 
-    <div class="d-flex justify-content-center mt-3">
-    <!-- Aggiungi il pulsante per mostrare le descrizioni -->
-    <button id="mostra_descrizioni" class="btn btn-primary" >Visualizza le correzioni </button>
-    </div>
-
-      <h2 class="text-center mb-4">Continua rispondendo alle domande di livello più complesso su {{ place }} per diventare un esperto.</h2>
-    <!-- Pulsante per le domande di livello due -->
-    <div class="d-flex justify-content-center mt-3">
-        <a href="{% url 'livello_due'  name=name place=place duration=duration%}" class="btn btn-primary">Domande di livello due</a>
-    </div>
-
-
 </div>
 
 {% load static %}
+
+
 <script src="{% static 'myapp/myscript.js' %}"></script>
 <script src="{% static 'myapp/map.js' %}"></script>
-<script src="{% static 'path/to/jquery.min.js' %}"></script>
 <script src="{% static 'myapp/descrizioni.js' %}"></script>
 <script src="{% static 'myapp/localstorage.js' %}"></script>
 
 
 
 
+
+
 {% endblock content %}
+

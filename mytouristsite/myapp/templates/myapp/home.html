@@ -1,37 +1,49 @@
 {% extends 'index.html' %}
 {% block title %} Your Tourist Guide| Home {% endblock title %}
 {% block content %}
-<div class="container mt-5 mx-auto">
-        <h1 class="mb-4" style="color: Purple">Your Tourist Guide</h1>
-        <p>Hi there! Ready for your next adventure?</p>
-        <form method="post">
+
+
+<div class="container mt-5 ">
+<div class="p-5 bg-primary text-white text-center">
+  <h1>La Guida Turistica AI</h1>
+   <p>Benvenuto! Pronto per la tua prossima avventura?</p>
+</div>
+
+
+    <form method="post">
             {% csrf_token %}
-            <div class="row mb-3">
-                <label  class="col-sm-2 col-form-label">Enter your name:</label>
+        <div class="row mb-3 text-center">
+           <label class="col-sm-2 col-form-label">Inserisci il tuo nome:</label>
+          <div class="col">
+              <div class="d-grid">
+             {{ form.name  }}
+              </div>
+          </div>
+        </div>
+        <div class="row mb-3 text-center">
+                <p>Quale città visiterai?</p>
+                <label class="col-sm-2 col-form-label">Inserisci la città:</label>
                 <div class="col-sm-10">
-                    {{ form.name }}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <p>Which city will you visit?</p>
-                <label class="col-sm-2 col-form-label">Enter the city:</label>
-                <div class="col-sm-10">
+                    <div class="d-grid">
                     {{ form.place }}
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <p>For how many days you need the itinerary?</p>
-                <label  class="col-sm-2 col-form-label">Enter the duration (in days):</label>
+        </div>
+            <div class="row mb-3 text-center">
+                <p>Per quanti giorni hai bisogno di un itinerario?</p>
+                <label  class="col-sm-2 col-form-label">Inserisci la durata (in giorni):</label>
                 <div class="col-sm-10">
+                    <div class="d-grid">
                     {{ form.duration }}
+                    </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-10 offset-sm-2">
-                    <button type="submit" class="btn btn-primary">GO</button>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Genera il tuo itinerario!</button>
                 </div>
             </div>
-        </form>
-    </div>
+    </form>
+</div>
 
 {% endblock content %}

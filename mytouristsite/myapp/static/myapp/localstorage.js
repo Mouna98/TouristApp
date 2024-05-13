@@ -1,4 +1,3 @@
-// Quando il documento è pronto
 document.addEventListener('DOMContentLoaded', function() {
     // Controlla se ci sono risposte salvate in localStorage
     var risposteSalvate = localStorage.getItem('risposte_utente');
@@ -6,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Ripristina le risposte salvate nei campi del modulo
         var risposte = JSON.parse(risposteSalvate);
         risposte.forEach(function(risposta) {
-            var input = document.getElementById(risposta.inputId);
+            var input = document.querySelector(`input[name="risposte[${risposta.indice}][risposta]"][value="${risposta.valore}"]`);
             if (input) {
                 input.checked = true;
             }
@@ -22,7 +21,7 @@ document.getElementById('risposte_form').addEventListener('submit', function() {
         var indice = input.getAttribute('name').match(/\d+/)[0];
         var valore = input.value;
         if (input.checked) {
-            risposte.push({indice: indice, valore: valore, inputId: input.id});
+            risposte.push({indice: indice, valore: valore});
         }
     });
     localStorage.setItem('risposte_utente', JSON.stringify(risposte));

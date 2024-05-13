@@ -2,8 +2,14 @@
 {% block title %} Your Tourist Guide| Itinerary{% endblock title %}
 {% block content %}
 <div class="container mt-5">
-        <h1  class="text-center mt-3" style="color: Purple">Welcome, {{ name }}!</h1>
-        <h2 class="text-center mb-4">Here is your itinerary to explore {{ place }}</h2>
+    <nav class="navbar navbar-expand-sm bg-primary navbar-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"> La Guida Turistica AI</a>
+  </div>
+</nav>
+
+        <h1  class="text-center mt-3" style="color: Blue">Ciao, {{ name }}!</h1>
+        <h2 class="text-center mb-4">Ecco il tuo itinerario per esplorare {{ place }}</h2>
         {% for giorno, attivita in giorni_itinerario.items %}
         <div class="card mb-3">
             <div class="card-header text-center">ITINERARIO: {{ giorno }}</div>
@@ -23,31 +29,31 @@
             </div>
         </div>
         {% endfor %}
-     <h5 class="text-center mb-4">View the city map here</h5>
+     <h5 class="text-center mb-4">Visualizza la mappa della città qua</h5>
 
 <div class="d-flex justify-content-center mt-3">
     <div id="map-container" style="display: none; width: 100%; height: 400px;"></div>
-    <button id="mostra_mappa" class="btn btn-primary">Mostra mappa</button>
+    <button id="mostra_mappa" class="btn btn-primary" data-place="{{ place }}">Mostra mappa</button>
     </div>
 
-    <h2 class="text-center mb-4">Answer these questions and get to know the city!</h2>
+    <h2 class="text-center mb-4">Rispondi a queste domande e impara a conoscere la città!</h2>
 
  <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">
-        <div class="card-header">Question</div>
+        <div class="card-header">Domanda</div>
         <div class="card-body">
             <p>{{ domanda.domanda }}</p>
             <!-- Input nascosti per memorizzare l'indice della domanda -->
             <input type="hidden" name="risposte[{{ forloop.counter0 }}][indice]" value="{{ forloop.counter0 }}">
             <div class="form-check mt-3">
                 <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="vero_{{ forloop.counter0 }}" value="true">
-                <label class="form-check-label" for="vero_{{ forloop.counter0 }}">True</label>
+                <label class="form-check-label" for="vero_{{ forloop.counter0 }}">Vero</label>
             </div>
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="risposte[{{ forloop.counter0 }}][risposta]" id="falso_{{ forloop.counter0 }}" value="false">
-                <label class="form-check-label" for="falso_{{ forloop.counter0 }}">False</label>
+                <label class="form-check-label" for="falso_{{ forloop.counter0 }}">Falso</label>
             </div>
             <!-- Descrizione della domanda (inizialmente nascosta)-->
                <p class="descrizione" style="display: none;">{{ domanda.descrizione }}</p>
@@ -70,10 +76,11 @@
 </div>
 
 {% load static %}
+
+
 <script src="{% static 'myapp/myscript.js' %}"></script>
 <script src="{% static 'myapp/map.js' %}"></script>
 <script src="{% static 'myapp/localstorage.js' %}"></script>
-
 
 
 
