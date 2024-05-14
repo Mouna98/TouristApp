@@ -20,12 +20,11 @@ from .import views
 
 urlpatterns = [
    # path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('',views.prima_pagina, name='prima_pagina'),
+    path('home/', views.home, name='home'),
     path('mostra_itinerario/<str:name>/<str:place>/<int:duration>/', views.mostra_itinerario, name='mostra_itinerario'),
     path('rispondi_domanda/<str:name>/<str:place>/<int:duration>/', views.rispondi_domanda, name='rispondi_domanda'),
     path('livello-due/<str:name>/<str:place>/<int:duration>/', views.livello_due, name='livello_due'),
-
-
 
 ]
 

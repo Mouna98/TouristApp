@@ -41,7 +41,7 @@
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">
-        <div class="card-header">Domanda</div>
+        <div class="card-header">Domanda Livello Base</div>
         <div class="card-body">
             <p>{{ domanda.domanda }}</p>
             <!-- Input nascosti per memorizzare l'indice della domanda -->
@@ -64,7 +64,7 @@
      <!-- Mostra il punteggio se disponibile -->
     {% if punteggio is not None %}
     <div class="text-center mt-3" id="punteggio_container">
-        <h2 class="text-center mb-4">Complimenti hai risposto alle domande di livello per i non esperti! sei riuscito a rispondere correttamente a {{ punteggio }} domande</h2>
+        <h2 class="text-center mb-4">Complimenti hai risposto a tutte le domande di livello base! sei riuscito a rispondere correttamente a {{ punteggio }} domande</h2>
         <p>Il tuo punteggio è: {{ punteggio }}</p>
     </div>
     {% endif %}
@@ -76,10 +76,10 @@
     <button id="mostra_descrizioni" class="btn btn-primary" >Visualizza le correzioni </button>
     </div>
 
-      <h2 class="text-center mb-4">Continua rispondendo alle domande di livello più complesso su {{ place }} per diventare un esperto.</h2>
+      <h2 class="text-center mb-4">Continua rispondendo alle domande di livello più complesso su {{ place }} per diventare un esperto</h2>
     <!-- Pulsante per le domande di livello due -->
     <div class="d-flex justify-content-center mt-3">
-        <a href="{% url 'livello_due'  name=name place=place duration=duration%}" class="btn btn-primary">Domande di livello due</a>
+        <a href="{% url 'livello_due'  name=name place=place duration=duration%}" class="btn btn-primary">Domande di livello esperto</a>
     </div>
 
 

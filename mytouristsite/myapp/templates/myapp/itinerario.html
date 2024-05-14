@@ -42,7 +42,7 @@
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">
-        <div class="card-header">Domanda</div>
+        <div class="card-header">Domanda Livello Base</div>
         <div class="card-body">
             <p>{{ domanda.domanda }}</p>
             <!-- Input nascosti per memorizzare l'indice della domanda -->
@@ -81,6 +81,9 @@
 <script src="{% static 'myapp/myscript.js' %}"></script>
 <script src="{% static 'myapp/map.js' %}"></script>
 <script src="{% static 'myapp/localstorage.js' %}"></script>
+<script>
+    var place = "{{ place }}";
+</script>
 
 
 

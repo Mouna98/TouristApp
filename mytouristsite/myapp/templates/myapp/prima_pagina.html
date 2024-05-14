@@ -1,0 +1,22 @@
+{% extends 'index.html' %}
+{% block title %} Your Tourist Guide| Livello due{% endblock title %}
+{% load static %}
+{% block content %}
+<!-- Immagine di sfondo a schermo intero -->
+<div class="background-image-container" style="background-image: url('https://images.unsplash.com/photo-1549937915-3dd443a3583f?q=80&w=2865&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); height: 100vh; background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+    <!-- Contenuto opzionale al centro dell'immagine
+    <h1 style="color: #f7f7f7">Benvenuto!</h1>-->
+</div>
+
+<!-- Header -->
+    <header class="fixed-bottom container" style="position: fixed; bottom: 0; left: 0; right: 0; text-align: center;">
+        <h1 class="app-name" style="color: #f7f7f7">La Guida Turistica AI</h1>
+        <p style="color: #f7f7f7">Pronto a ricevere degli itinerari per le tue prossime mete turistiche?</p>
+        <p style="color: #f7f7f7">Inizia subito! Imperai a conoscere la tua prossima meta con dei fantastici quiz</p>
+        <button class="btn btn-primary get-started-button" onclick="window.location.href='/home'">Inizia</button>
+    </header>
+
+
+
+
+{% endblock content %}

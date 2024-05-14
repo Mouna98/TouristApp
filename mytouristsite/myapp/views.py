@@ -319,3 +319,7 @@ def calcola_punteggio_livello_due(place, risposte_utente):
             punteggio += 1
     return punteggio
 
+
+def prima_pagina(request):
+    return render(request, 'myapp/prima_pagina.html')
+
