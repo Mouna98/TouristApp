@@ -69,16 +69,14 @@
     <div class="text-center mt-3" id="punteggio_container">
         <h2 class="text-center mb-4">Congratulazioni hai risposto a tutte le domande di livello esperto! sei riuscito a rispondere correttamente a {{ punteggio }} domande</h2>
         <p>Il tuo punteggio è: {{ punteggio }}</p>
-         <div class="d-flex justify-content-center mt-3">
+    </div>
+    {% endif %}
+ </form>
+
+    <div class="d-flex justify-content-center mt-3">
     <!-- Aggiungi il pulsante per mostrare le descrizioni -->
     <button id="mostra_descrizioni" class="btn btn-primary" >Visualizza le correzioni </button>
          </div>
-
-    </div>
-    {% endif %}
-
-
- </form>
 
 
 </div>
