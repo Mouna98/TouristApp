@@ -11,7 +11,7 @@ import re
 
 
 # Configura la chiave API di OpenAI
-#SECRET_API_OPENAI
+#SECRET_KEY_HERE
 
 def prima_pagina(request):
     return render(request, 'myapp/prima_pagina.html')
@@ -410,4 +410,16 @@ def get_wikipedia_image_url(title):
         return thumbnail_url
     else:
         return None
+
+
+def get_session_data(request):
+    try:
+        giorni_itinerario = request.session.get('itinerario', {})
+        domande_vero_falso = request.session.get('domande_vero_falso', [])
+        return JsonResponse({
+            'giorni_itinerario': giorni_itinerario,
+            'domande_vero_falso': domande_vero_falso
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
