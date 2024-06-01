@@ -20,9 +20,10 @@
                         <h5 class="card-title">{{ attivita_item.luogo }}</h5>
                         <p class="card-text">Orario: {{ attivita_item.orario }}</p>
                         <p class="card-text">{{ attivita_item.descrizione }}</p>
-                        {% if attivita_item.immagine %}
-                    <img src="{{ attivita_item.immagine }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
-                    {% endif %}
+
+                        {% if attivita_item.image_url %}
+                <img src="{{ attivita_item.image_url }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
+                {% endif %}
                     </li>
                     {% endfor %}
                 </ul>
@@ -38,7 +39,7 @@
 
     <h2 class="text-center mb-4">Rispondi a queste domande e impara a conoscere la città!</h2>
 
- <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}?punteggio={{ punteggio }}">
+ <form id="risposte_form" method="post" action="{% url 'rispondi_domanda' name=name place=place duration=duration %}">
     {% csrf_token %}
     {% for domanda in domande_vero_falso %}
     <div class="card mb-3">

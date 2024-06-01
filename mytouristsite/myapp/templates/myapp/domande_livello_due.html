@@ -20,9 +20,10 @@
                         <h5 class="card-title">{{ attivita_item.luogo }}</h5>
                         <p class="card-text">Orario: {{ attivita_item.orario }}</p>
                         <p class="card-text">{{ attivita_item.descrizione }}</p>
-                        {% if attivita_item.immagine %}
-                    <img src="{{ attivita_item.immagine }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
-                    {% endif %}
+                        {% if attivita_item.image_url %}
+                <img src="{{ attivita_item.image_url }}" class="img-fluid" alt="{{ attivita_item.luogo }}" style="max-width: 150px; max-height: 150px;">
+                {% endif %}
+
                     </li>
                     {% endfor %}
                 </ul>

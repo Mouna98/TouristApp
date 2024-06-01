@@ -1,10 +1,20 @@
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.urls import reverse
 from .forms import VisitForm
 import requests
 import json
 from django.http import HttpResponseNotFound, HttpResponseServerError, HttpResponse, HttpResponseRedirect, JsonResponse
-from .models import Visit
+import wikipediaapi
+import openai
+import re
+
+
+# Configura la chiave API di OpenAI
+#SECRET_API_OPENAI
+
+def prima_pagina(request):
+    return render(request, 'myapp/prima_pagina.html')
 
 
 def home(request):
@@ -31,110 +41,143 @@ def home(request):
 
 def mostra_itinerario(request, name, place, duration):
     try:
-        # Leggi il file JSON
-        with open('myapp/itinerari.json') as file:
-            itinerari_data = json.load(file)
+        # Richiesta di creazione dell'itinerario tramite GPT-4
+        prompt_itinerary = f"""
+            Crea un itinerario di viaggio per {place} per {duration} giorni. Includi il nome dei luoghi da visitare, l'orario e una breve descrizione per ogni luogo.
+            Fornisci l'output nel seguente formato JSON:
+            {{
+                "{place}": {{
+                    "giorno 1": {{
+                        "data": "YYYY-MM-DD",
+                        "attività": [
+                            {{
+                                "luogo": "Nome del luogo",
+                                "orario": "Orario di inizio - Orario di fine",
+                                "descrizione": "Descrizione del luogo",
+                                "latitudine": "Latitudine",
+                                "longitudine": "Longitudine"
+                            }},
+                            ...
+                        ]
+                    }},
+                    ...
+                    "domande_vero_falso": [
+                        {{
+                            "indice": 0,
+                            "domanda": "Domanda vero/falso sull'itinerario",
+                            "risposta": "true/false",
+                            "descrizione": "Spiegazione della risposta"
+                        }},
+                        ...
+                    ]
+                }}
+            }}
+            """
 
-        itinerario_citta = itinerari_data.get(place.lower(), {})
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Sei un assistente di viaggio."},
+                {"role": "user", "content": prompt_itinerary}
+            ]
+        )
+
+        # Estraiamo i dati dell'itinerario dalla risposta
+        itinerary_data = response.choices[0].message['content']
+        itinerary = json.loads(itinerary_data)
+
+        # Costruiamo la struttura dati dell'itinerario come richiesto
         giorni_itinerario = {}
-        domande_vero_falso = []
-
-        # Funzione per ottenere URL casuale da Unsplash
-        def get_unsplash_image_url(luogo, place):
-            query = f"{luogo.replace(' ', '-')} {place.replace(' ', '-')}"
-            response = requests.get(f"https://api.unsplash.com/photos/random?query={query}&client_id=a-ybJeh4LRm2Ehc2SCZyHqWWJ6NSaeNRgSxon5JGCUY")
-            if response.status_code == 200:
-                return response.json()['urls']['regular']
-            else:
-                return None
-
-        # Ottieni l'itinerario per la città e il numero di giorni
         for i in range(1, int(duration) + 1):
             giorno_key = f'giorno {i}'
-            giorno_data = itinerario_citta.get(giorno_key, {})
-
-            # Ottieni solo le informazioni necessarie per ogni attività del giorno
+            giorno_data = itinerary.get(place, {}).get(giorno_key, {})
             attivita_giorno = []
             for attivita in giorno_data.get('attività', []):
                 luogo = attivita.get('luogo', '')
                 orario = attivita.get('orario', '')
                 descrizione = attivita.get('descrizione', '')
-                # Ottieni URL casuale per l'immagine del luogo da Unsplash
-                immagine = get_unsplash_image_url(luogo, place)
-                attivita_giorno.append(
-                    {'luogo': luogo, 'orario': orario, 'descrizione': descrizione, 'immagine': immagine})
+                latitudine = attivita.get('latitudine', '')
+                longitudine = attivita.get('longitudine', '')
 
+                # Ottieni l'URL dell'immagine da Wikipedia per il luogo
+                image_url = get_wikipedia_image_url(luogo)
+
+                attivita_giorno.append({
+                    'luogo': luogo,
+                    'orario': orario,
+                    'descrizione': descrizione,
+                    'latitudine': latitudine,
+                    'longitudine': longitudine,
+                     'image_url': image_url
+                })
             giorni_itinerario[giorno_key] = attivita_giorno
 
-        # Ottieni le domande vero/falso per la città
-        domande_vero_falso = itinerari_data.get(place.lower(), {}).get('domande_vero_falso', [])
+        domande_vero_falso = itinerary.get(place, {}).get("domande_vero_falso", [])
 
-        # Aggiungi il punteggio al contesto
+        # Salviamo l'itinerario e le domande nella sessione
+        request.session['itinerario'] = giorni_itinerario
+        request.session['domande_vero_falso'] = domande_vero_falso
+
         context = {
             'name': name,
             'place': place,
             'duration': duration,
             'giorni_itinerario': giorni_itinerario,
             'domande_vero_falso': domande_vero_falso,
-            'punteggio': request.GET.get('punteggio'),  # Passa il punteggio alla vista
-
+            'punteggio': None
         }
 
-
+        # Renderizziamo il template itinerario.html con i dati dell'itinerario
         return render(request, 'myapp/itinerario.html', context)
-    except FileNotFoundError:
-        return HttpResponseNotFound("File JSON non trovato")
-    except Exception as e:
-        return HttpResponseServerError("Si è verificato un errore durante il recupero dell'itinerario: {}".format(str(e)))
 
-def is_risposta_corretta(place, indice, risposta):
+    except Exception as e:
+        return render(request, 'myapp/itinerario.html', {'error': str(e)})
+
+def is_risposta_corretta(place, indice, risposta_utente, risposte_corrette):
     try:
-        # Leggi il file JSON degli itinerari
-        with open('myapp/itinerari.json') as file:
-            itinerari_data = json.load(file)
+        # Recupera la risposta corretta dal JSON
+        risposta_corretta = None
+        for domanda in risposte_corrette:
+            if domanda['indice'] == indice:
+                risposta_corretta = domanda['risposta'].strip().lower()
+                break
 
-        # Trova il luogo nel file JSON
-        itinerario_citta = itinerari_data.get(place.lower(), {})
-        domande_vero_falso = itinerario_citta.get('domande_vero_falso', [])
+        if risposta_corretta is None:
+            print(f"Nessuna risposta trovata per l'indice: {indice}")
+            return False
 
-        # Verifica se la chiave 'domande_vero_falso' è presente nel dizionario
-        if domande_vero_falso:
-            print("Chiave 'domande_vero_falso' trovata")
-            if 0 <= indice < len(domande_vero_falso):
-                print("Indice valido:", indice)
-                # Confronta direttamente le stringhe delle risposte
-                if domande_vero_falso[indice]["risposta"].lower() == risposta['risposta'].lower():
-                    print(f"Domanda {indice} risposta corretta: {risposta['risposta']}")
-                    return True
-                else:
-                    print(f"Domanda {indice} risposta errata: {risposta['risposta']}")
-            else:
-                print("Indice non valido")
-        else:
-            print("Chiave 'domande_vero_falso' non trovata per il luogo specificato")
+        # Confronta la risposta dell'utente con quella corretta
+        risposta_utente = risposta_utente['risposta'].strip().lower()
+        is_correct = (risposta_corretta == risposta_utente or
+                      (risposta_corretta == 'true' and risposta_utente in ['true', 'sì']) or
+                      (risposta_corretta == 'false' and risposta_utente in ['false', 'no']))
 
-    except FileNotFoundError:
-        print("File JSON non trovato")
+        print(
+            f"Risposta corretta per indice {indice}: {risposta_corretta}, Risposta utente: {risposta_utente}, Esito: {is_correct}")
+
+        return is_correct
     except Exception as e:
-        print("Errore durante il caricamento del file JSON:", e)
-
-    return False
-
-def calcola_punteggio(place, risposte_utente):
-    punteggio = 0
-    for indice, risposta in risposte_utente.items():
-        if is_risposta_corretta(place, int(indice), risposta):
-            punteggio += 1
-    return punteggio
+        print(f"Errore durante la verifica della risposta: {e}")
+        return False
 
 
+def calcola_punteggio(place, risposte_utente, risposte_corrette):
+    try:
+        punteggio = 0
+        for index, risposta in risposte_utente.items():
+            indice = int(risposta['indice'])
+            if is_risposta_corretta(place, indice, risposta, risposte_corrette):
+                punteggio += 1
+        print(f"Punteggio totale calcolato: {punteggio}")
+        return punteggio
+    except Exception as e:
+        print(f"Errore durante il calcolo del punteggio: {e}")
+        return 0  # Restituisci 0 se si verifica un errore
 
 def rispondi_domanda(request, name, place, duration):
-    print("Inizio vista rispondi_domanda")
-
     if request.method == 'POST':
-        risposte_utente = {}
         try:
+            risposte_utente = {}
             for key, value in request.POST.items():
                 if key.startswith('risposte'):
                     index = key.split('[')[1].split(']')[0]
@@ -143,107 +186,142 @@ def rispondi_domanda(request, name, place, duration):
                         risposte_utente[index] = {}
                     risposte_utente[index][campo] = value
 
-            print("Risposte dell'utente:", risposte_utente)
+            # Recupera l'itinerario e le domande dalla sessione
+            itinerario = request.session.get('itinerario', {})
+            domande = request.session.get('domande_vero_falso', [])
 
-            punteggio = calcola_punteggio(place, risposte_utente)
-            print("Punteggio:", punteggio)
-
-            # Ottieni l'itinerario e le domande dal file JSON degli itinerari
-            itinerario,domande=ottieni_domande_itinerario(name, place, duration)
+            # Calcola il punteggio
+            punteggio = calcola_punteggio(place, risposte_utente, domande)
 
             # Aggiungi il punteggio, l'itinerario e le domande al contesto
             context = {
-                'name': name,  # Aggiungi il nome se necessario
+                'name': name,
                 'place': place,
-                'duration': duration,  # Aggiungi la durata se necessario
+                'duration': duration,
                 'giorni_itinerario': itinerario,
                 'domande_vero_falso': domande,
-                'punteggio': punteggio  # Aggiungi il punteggio qui
+                'punteggio': punteggio
             }
 
-            # Renderizza direttamente il template dell'itinerario con il punteggio, l'itinerario e le domande
+            # Renderizza il template punteggio.html con il contesto
             return render(request, 'myapp/punteggio.html', context)
         except Exception as e:
-         print(f"Errore durante la gestione delle risposte dell'utente: {e}")
-         return HttpResponseServerError("Si è verificato un errore durante la gestione delle risposte dell'utente.")
+            print(f"Errore durante la gestione delle risposte dell'utente: {e}")
+            return HttpResponseServerError("Si è verificato un errore durante la gestione delle risposte dell'utente.")
     else:
-         # Se la richiesta non è di tipo POST, restituisci una risposta HTTP 404
-         return HttpResponseNotFound("La pagina richiesta non è stata trovata.")
+        return HttpResponseNotFound("La pagina richiesta non è stata trovata.")
 
-def ottieni_domande_itinerario( name, place, duration):
+def ottieni_domande_itinerario(name, place, duration):
     try:
-        # Leggi il file JSON
-        with open('myapp/itinerari.json') as file:
-            itinerari_data = json.load(file)
+        prompt_itinerary = f"""
+            Create a travel itinerary for {place} for {duration} days. Include the name of the places to visit, the time and a brief description for each place.
+            Provide the output in the following JSON format:
+            {{
+                "{place}": {{
+                    "giorno 1": {{
+                        "date": "YYYY-MM-DD",
+                        "attività": [
+                            {{
+                                "luogo": "Place name",
+                                "orario": "Start time - End time",
+                                "descrizione": "Description of the place",
+                                "latitudine": "Latitude",
+                                "longitudine": "Longitude"
+                            }},
+                            ...
+                        ]
+                    }},
+                    ...
+                    "domande_vero_falso": [
+                        {{
+                            "indice": 0,
+                            "domanda": "True/false question about the itinerary",
+                            "risposta": "true/false",
+                            "descrizione": "Explanation about the answer"
+                        }},
+                        ...
+                    ]
+                }}
+            }}
+            """
 
-        itinerario_citta = itinerari_data.get(place.lower(), {})
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a travel assistant."},
+                {"role": "user", "content": prompt_itinerary}
+            ]
+        )
+
+        itinerary_data = response.choices[0].message['content']
+        itinerary = json.loads(itinerary_data)
+
         giorni_itinerario = {}
-        domande_vero_falso = []
-
-        # Funzione per ottenere URL casuale da Unsplash
-        def get_unsplash_image_url(luogo, place):
-            query = f"{luogo.replace(' ', '-')} {place.replace(' ', '-')}"
-            response = requests.get(
-                f"https://api.unsplash.com/photos/random?query={query}&client_id=a-ybJeh4LRm2Ehc2SCZyHqWWJ6NSaeNRgSxon5JGCUY")
-            if response.status_code == 200:
-                return response.json()['urls']['regular']
-            else:
-                return None
-
-        # Ottieni l'itinerario per la città e il numero di giorni
         for i in range(1, int(duration) + 1):
             giorno_key = f'giorno {i}'
-            giorno_data = itinerario_citta.get(giorno_key, {})
-
-            # Ottieni solo le informazioni necessarie per ogni attività del giorno
+            giorno_data = itinerary.get(place, {}).get(giorno_key, {})
             attivita_giorno = []
             for attivita in giorno_data.get('attività', []):
                 luogo = attivita.get('luogo', '')
                 orario = attivita.get('orario', '')
                 descrizione = attivita.get('descrizione', '')
-                # Ottieni URL casuale per l'immagine del luogo da Unsplash
-                immagine = get_unsplash_image_url(luogo, place)
-                attivita_giorno.append(
-                    {'luogo': luogo, 'orario': orario, 'descrizione': descrizione, 'immagine': immagine})
-
+                latitudine = attivita.get('latitudine', '')
+                longitudine = attivita.get('longitudine', '')
+                attivita_giorno.append({
+                    'luogo': luogo,
+                    'orario': orario,
+                    'descrizione': descrizione,
+                    'latitudine': latitudine,
+                    'longitudine': longitudine
+                })
             giorni_itinerario[giorno_key] = attivita_giorno
 
-        # Ottieni le domande vero/falso per la città
-        domande_vero_falso = itinerario_citta.get('domande_vero_falso', [])
-
-        # Aggiungi il punteggio al contesto
-        context = {
-            'name': name,
-            'place': place,
-            'duration': duration,
-            'giorni_itinerario': giorni_itinerario,
-            'domande_vero_falso': domande_vero_falso,
-
-
-        }
+        domande_vero_falso = itinerary.get(place, {}).get("domande_vero_falso", [])
 
         return giorni_itinerario, domande_vero_falso
-    except FileNotFoundError:
+    except json.JSONDecodeError:
+        print("Errore durante il parsing del JSON.")
         return {}, []
     except Exception as e:
+        print(f"Errore durante il recupero dell'itinerario e delle domande: {e}")
         return {}, []
 
-
 def livello_due(request, name, place, duration):
+    itinerario = request.session.get('itinerario', {})
     try:
-        # Leggi il file JSON degli itinerari
-        with open('myapp/itinerari.json') as file:
-            itinerari_data = json.load(file)
+        prompt_livello_due = f"""
+            Fornisci domande di livello due per {place} nel seguente formato JSON:
+            {{
+                "domande_livello_due": [
+                    {{
+                        "indice": 0,
+                        "domanda": "Domanda di livello due",
+                        "risposta": "true/false",
+                        "descrizione": "Spiegazione della risposta"
+                    }},
+                    ...
+                ]
+            }}
+        """
 
-        # Ottieni le domande di livello due per la città
-        domande_livello_due = itinerari_data.get(place.lower(), {}).get('domande_livello_due', [])
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Sei un assistente quiz di viaggio."},
+                {"role": "user", "content": prompt_livello_due}
+            ]
+        )
 
-        # Inizializza punteggio a None
+        domande_livello_due_data = response.choices[0].message['content']
+        domande_livello_due = json.loads(domande_livello_due_data).get('domande_livello_due', [])
+
+        # Memorizza le nuove domande nella sessione
+        request.session['domande_livello_due'] = domande_livello_due
+
         punteggio = None
 
         if request.method == 'POST':
             risposte_utente = {}
-
             for key, value in request.POST.items():
                 if key.startswith('risposte'):
                     index = key.split('[')[1].split(']')[0]
@@ -252,74 +330,84 @@ def livello_due(request, name, place, duration):
                         risposte_utente[index] = {}
                     risposte_utente[index][campo] = value
 
-            print("Risposte dell'utente:", risposte_utente)
-
-            # Calcola il punteggio solo se ci sono risposte dell'utente
             if risposte_utente:
-                punteggio = calcola_punteggio_livello_due(place, risposte_utente)
-                print("Punteggio:", punteggio)
+                # Recupera le domande di livello due dalla sessione
+                domande_livello_due = request.session.get('domande_livello_due', [])
+                punteggio = calcola_punteggio_livello_due(place, risposte_utente, domande_livello_due)
 
-        # Ottieni l'itinerario per la città e il numero di giorni
-        itinerario, _ = ottieni_domande_itinerario(name, place, duration)
+                # Debug: stampa il contenuto della sessione
+                print("Contenuto della sessione:")
+                print(request.session)
 
-        # Aggiungi il punteggio al contesto
+            # Recupera l'itinerario dalla sessione
+            itinerario = request.session.get('itinerario', {})
+
+            # Debug: stampa l'itinerario recuperato
+            print("Itinerario recuperato dalla sessione:")
+            print(itinerario)
+
         context = {
             'name': name,
             'place': place,
             'duration': duration,
             'giorni_itinerario': itinerario,
             'domande': domande_livello_due,
-            'punteggio': punteggio  # Passa il punteggio al contesto
+            'punteggio': punteggio
         }
-
         return render(request, 'myapp/domande_livello_due.html', context)
-    except FileNotFoundError:
-        return HttpResponseNotFound("File JSON non trovato")
     except Exception as e:
-        return HttpResponseServerError("Si è verificato un errore durante il recupero delle domande di livello due: {}".format(str(e)))
+        # Debug: stampa l'errore
+        print(f"Errore nella vista livello_due: {e}")
+        return HttpResponseServerError(f"Si è verificato un errore durante il recupero delle domande di livello due: {str(e)}")
 
-
-def is_risposta_corretta_livello_due(place, indice, risposta):
+def calcola_punteggio_livello_due(place, risposte_utente, risposte_corrette):
     try:
-        # Leggi il file JSON degli itinerari
-        with open('myapp/itinerari.json') as file:
-            itinerari_data = json.load(file)
-
-        # Trova il luogo nel file JSON
-        itinerario_citta = itinerari_data.get(place.lower(), {})
-        domande_livello_due = itinerario_citta.get('domande_livello_due', [])
-
-        # Verifica se la chiave 'domande_livello_due' è presente nel dizionario
-        if domande_livello_due:
-            print("Chiave 'domande_livello_due' trovata")
-            if 0 <= indice < len(domande_livello_due):
-                print("Indice valido per domande livello due:", indice)
-                # Confronta direttamente le stringhe delle risposte
-                if domande_livello_due[indice]["risposta"].lower() == risposta['risposta'].lower():
-                    print(f"Domanda {indice} di livello due risposta corretta: {risposta['risposta']}")
-                    return True
-                else:
-                    print(f"Domanda {indice} di livello due risposta errata: {risposta['risposta']}")
-            else:
-                print("Indice non valido per domande livello due")
-        else:
-            print("Chiave 'domande_livello_due' non trovata per il luogo specificato")
-
-    except FileNotFoundError:
-        print("File JSON non trovato")
+        punteggio = 0
+        for index, risposta in risposte_utente.items():
+            indice = int(risposta['indice'])
+            if is_risposta_corretta_livello_due(place, indice, risposta, risposte_corrette):
+                punteggio += 1
+        print(f"Punteggio totale calcolato: {punteggio}")
+        return punteggio
     except Exception as e:
-        print("Errore durante il caricamento del file JSON:", e)
+        print(f"Errore durante il calcolo del punteggio: {e}")
+        return 0  # Restituisci 0 se si verifica un errore
 
-    return False
+def is_risposta_corretta_livello_due(place, indice, risposta_utente, risposte_corrette):
+        try:
+            # Recupera la risposta corretta dal JSON
+            risposta_corretta = None
+            for domanda in risposte_corrette:
+                if domanda['indice'] == indice:
+                    risposta_corretta = domanda['risposta'].strip().lower()
+                    break
 
-def calcola_punteggio_livello_due(place, risposte_utente):
-    punteggio = 0
-    for indice, risposta in risposte_utente.items():
-        if is_risposta_corretta_livello_due(place, int(indice), risposta):
-            punteggio += 1
-    return punteggio
+            if risposta_corretta is None:
+                print(f"Nessuna risposta trovata per l'indice: {indice}")
+                return False
+
+            # Confronta la risposta dell'utente con quella corretta
+            risposta_utente = risposta_utente['risposta'].strip().lower()
+            is_correct = (risposta_corretta == risposta_utente or
+                          (risposta_corretta == 'true' and risposta_utente in ['true', 'sì']) or
+                          (risposta_corretta == 'false' and risposta_utente in ['false', 'no']))
+
+            print(
+                f"Risposta corretta per indice {indice}: {risposta_corretta}, Risposta utente: {risposta_utente}, Esito: {is_correct}")
+
+            return is_correct
+        except Exception as e:
+            print(f"Errore durante la verifica della risposta: {e}")
+            return False
 
 
-def prima_pagina(request):
-    return render(request, 'myapp/prima_pagina.html')
+
+def get_wikipedia_image_url(title):
+    response = requests.get(f"https://en.wikipedia.org/api/rest_v1/page/summary/{title}")
+    if response.status_code == 200:
+        page_data = response.json()
+        thumbnail_url = page_data.get('thumbnail', {}).get('source')
+        return thumbnail_url
+    else:
+        return None
 
